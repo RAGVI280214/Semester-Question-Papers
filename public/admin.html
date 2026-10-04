@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Admin - Question Papers
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <div class="logo">
+        🔐 Admin Panel
+    </div>
+
+    <nav>
+
+        <a href="/">
+            Home
+        </a>
+
+    </nav>
+
+</header>
+
+
+
+<main class="admin-page">
+
+
+<!-- LOGIN -->
+
+<section
+    id="loginSection"
+    class="admin-box"
+>
+
+    <h1>
+        Admin Login
+    </h1>
+
+
+    <p>
+        Only the administrator can upload
+        or modify question papers.
+    </p>
+
+
+    <form id="loginForm">
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Enter admin password"
+            required
+        >
+
+
+        <button type="submit">
+            Login
+        </button>
+
+    </form>
+
+
+    <p id="loginMessage"></p>
+
+</section>
+
+
+
+<!-- ADMIN PANEL -->
+
+<section
+    id="adminSection"
+    class="admin-box"
+    style="display:none;"
+>
+
+
+    <div class="admin-header">
+
+        <h1>
+            Manage Question Papers
+        </h1>
+
+
+        <button
+            id="logoutButton"
+            class="logout-button"
+        >
+            Logout
+        </button>
+
+    </div>
+
+
+
+    <h2>
+        Upload New Paper
+    </h2>
+
+
+    <form id="uploadForm">
+
+
+        <input
+            type="text"
+            name="title"
+            placeholder="Paper Title"
+            required
+        >
+
+
+        <input
+            type="text"
+            name="subject"
+            placeholder="Subject"
+            required
+        >
+
+
+        <select
+            name="branch"
+            required
+        >
+
+            <option value="">
+                Select Branch
+            </option>
+
+            <option value="CSE">
+                CSE
+            </option>
+
+            <option value="ECE">
+                ECE
+            </option>
+
+            <option value="EE">
+                Electrical
+            </option>
+
+            <option value="ME">
+                Mechanical
+            </option>
+
+            <option value="CE">
+                Civil
+            </option>
+
+        </select>
+
+
+        <select
+            name="semester"
+            required
+        >
+
+            <option value="">
+                Select Semester
+            </option>
+
+            <option value="1">
+                1st Semester
+            </option>
+
+            <option value="2">
+                2nd Semester
+            </option>
+
+            <option value="3">
+                3rd Semester
+            </option>
+
+            <option value="4">
+                4th Semester
+            </option>
+
+            <option value="5">
+                5th Semester
+            </option>
+
+            <option value="6">
+                6th Semester
+            </option>
+
+            <option value="7">
+                7th Semester
+            </option>
+
+            <option value="8">
+                8th Semester
+            </option>
+
+        </select>
+
+
+        <input
+            type="number"
+            name="year"
+            placeholder="Exam Year"
+            required
+        >
+
+
+        <input
+            type="file"
+            name="pdf"
+            accept=".pdf,application/pdf"
+            required
+        >
+
+
+        <button type="submit">
+            Upload Paper
+        </button>
+
+    </form>
+
+
+    <p id="uploadMessage"></p>
+
+
+
+    <h2>
+        Existing Papers
+    </h2>
+
+
+    <div
+        id="adminPapers"
+        class="papers-container"
+    >
+
+    </div>
+
+
+</section>
+
+</main>
+
+
+<script src="admin.js"></script>
+
+</body>
+
+</html>
