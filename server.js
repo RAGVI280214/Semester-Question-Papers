@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
+const mongoose=require("mongoose");
 const multer = require("multer");
 const session = require("express-session");
 const fs = require("fs");
@@ -13,6 +14,23 @@ cloudinary.config({
 });
 
 const app = express();
+const { MongoClient } = require("mongodb");
+
+const mongoClient = new MongoClient(process.env.MONGODB_URI);
+
+let db;
+
+async function connectMongoDB() {
+    try {
+        await mongoClient.connect();
+        db = mongoClient.db("ragvipapers");
+        console.log("MongoDB connected successfully!");
+    } catch (error) {
+        console.error("MongoDB connection failed:", error.message);
+    }
+}
+
+connectMongoDB();
 
 const PORT = process.env.PORT || 3000;
 

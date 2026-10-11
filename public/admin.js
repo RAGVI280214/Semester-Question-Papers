@@ -317,7 +317,7 @@ async function loadAdminPapers() {
 
                     <a
                         class="view-button"
-                        href="/uploads/${paper.filename}"
+                        href="${paper.url}"
                         target="_blank"
                     >
                         View
