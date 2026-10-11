@@ -125,7 +125,7 @@ function displayPapers(papers) {
 
                     <a
                         class="view-button"
-                        href="/uploads/${paper.filename}"
+                        href="${paper.url}"
                         target="_blank"
                     >
                         View PDF
@@ -134,7 +134,7 @@ function displayPapers(papers) {
 
                     <a
                         class="download-button"
-                        href="/uploads/${paper.filename}"
+                        href="${paper.url}"
                         download="${paper.originalName}"
                     >
                         Download

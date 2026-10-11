@@ -5,6 +5,12 @@ const multer = require("multer");
 const session = require("express-session");
 const fs = require("fs");
 const path = require("path");
+const cloudinary = require("cloudinary").v2;
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const app = express();
 
@@ -79,10 +85,6 @@ app.use(express.static(
 // PDF FILES
 // -------------------------
 
-app.use(
-    "/uploads",
-    express.static(uploadFolder)
-);
 
 
 // -------------------------
@@ -297,121 +299,101 @@ app.get("/api/papers", (req, res) => {
 // ADMIN ONLY
 // -------------------------
 
-app.post(
-    "/api/upload",
-    requireAdmin,
-    upload.single("pdf"),
-    (req, res) => {
+app.post("/api/upload", upload.single("pdf"), async (req, res) => {
 
-        try {
+    try {
 
-            if (!req.file) {
-
-                return res.status(400).json({
-
-                    message:
-                        "Please select a PDF file."
-
-                });
-
-            }
-
-
-            const {
-                title,
-                subject,
-                branch,
-                semester,
-                year
-            } = req.body;
-
-
-            if (
-                !title ||
-                !subject ||
-                !branch ||
-                !semester ||
-                !year
-            ) {
-
-                fs.unlinkSync(
-                    req.file.path
-                );
-
-
-                return res.status(400).json({
-
-                    message:
-                        "Please fill all fields."
-
-                });
-
-            }
-
-
-            const papers = getPapers();
-
-
-            const newPaper = {
-
-                id: Date.now(),
-
-                title: title,
-
-                subject: subject,
-
-                branch: branch,
-
-                semester: semester,
-
-                year: year,
-
-                filename:
-                    req.file.filename,
-
-                originalName:
-                    req.file.originalname,
-
-                date:
-                    new Date().toISOString()
-
-            };
-
-
-            papers.push(newPaper);
-
-
-            savePapers(papers);
-
-
-            res.json({
-
-                success: true,
-
-                message:
-                    "Question paper uploaded successfully.",
-
-                paper: newPaper
-
+        if (!req.file) {
+            return res.status(400).json({
+                message: "Please select a PDF file."
             });
-
         }
 
-        catch (error) {
+        const {
+            title,
+            subject,
+            branch,
+            semester,
+            year
+        } = req.body;
 
-            console.error(error);
+        if (!title || !subject || !branch || !semester || !year) {
 
-            res.status(500).json({
+            if (fs.existsSync(req.file.path)) {
+                fs.unlinkSync(req.file.path);
+            }
 
-                message:
-                    "Something went wrong."
-
+            return res.status(400).json({
+                message: "Please fill all fields."
             });
-
         }
 
+        // Upload PDF to Cloudinary
+        const cloudinaryResult = await cloudinary.uploader.upload(
+            req.file.path,
+            {
+                resource_type: "image",
+                folder: "semester-question-papers",
+                public_id: path.parse(req.file.filename).name
+            }
+        );
+
+        // Delete temporary local file
+        if (fs.existsSync(req.file.path)) {
+            fs.unlinkSync(req.file.path);
+        }
+
+        const papers = getPapers();
+
+        const newPaper = {
+
+            id: Date.now(),
+
+            title: title,
+
+            subject: subject,
+
+            branch: branch,
+
+            semester: semester,
+
+            year: year,
+
+            filename: req.file.filename,
+
+            originalName: req.file.originalname,
+
+            url: cloudinaryResult.secure_url,
+
+            cloudinaryPublicId: cloudinaryResult.public_id,
+
+            date: new Date().toISOString()
+
+        };
+
+        papers.push(newPaper);
+
+        savePapers(papers);
+
+        res.json({
+            message: "Question paper uploaded successfully!",
+            paper: newPaper
+        });
+
+    } catch (error) {
+
+        console.error("UPLOAD ERROR:", error);
+
+        // Remove temporary file if it exists
+        if (req.file && fs.existsSync(req.file.path)) {
+            fs.unlinkSync(req.file.path);
+        }
+
+        res.status(500).json({
+            message: "Something went wrong while uploading the PDF."
+        });
     }
-);
+});
 
 
 // -------------------------
@@ -500,7 +482,7 @@ app.put(
 app.delete(
     "/api/papers/:id",
     requireAdmin,
-    (req, res) => {
+    async (req, res) => {
 
         const id =
             Number(req.params.id);
@@ -527,22 +509,16 @@ app.delete(
         }
 
 
-        const filePath =
-            path.join(
-                uploadFolder,
-                paper.filename
-            );
+        if (paper.cloudinaryPublicId) {
 
-
-        if (
-            fs.existsSync(filePath)
-        ) {
-
-            fs.unlinkSync(
-                filePath
-            );
-
+    await cloudinary.uploader.destroy(
+        paper.cloudinaryPublicId,
+        {
+            resource_type: "image"
         }
+    );
+
+}
 
 
         const updatedPapers =
@@ -618,4 +594,4 @@ app.listen(
         );
 
     }
-);
+)
